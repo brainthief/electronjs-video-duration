@@ -1,9 +1,12 @@
 const electron = require("electron")
+const ffmpeg = require("fluent-ffmpeg")
 
 const { app, BrowserWindow, ipcMain } = electron
 
+let mainWindows
+
 app.on("ready", () => {
- const mainWindows = new BrowserWindow({
+ mainWindows = new BrowserWindow({
   webPreferences: {
    nodeIntegration: true,
   },
@@ -12,5 +15,7 @@ app.on("ready", () => {
 })
 
 ipcMain.on("video:submit", (event, path) => {
- console.log(path)
+ ffmpeg.ffprobe(path, (err, metadata) => {
+  mainWindows.webContents.send("video:metadata", metadata.format.duration)
+ })
 })
